@@ -18,13 +18,34 @@ func main() {
     // https://pkg.go.dev/net/http#ServeMux
     mux := http.NewServeMux()
 
+    // ======================================================================
+    // ----------------------------------------------------------------------
+    // Web Endpoints
+    // ----------------------------------------------------------------------
+    // ======================================================================
+
     // https://pkg.go.dev/net/http#ServeMux.Handle
-    //mux.Handle("/", fs)
     handler := http.StripPrefix("/app", fs)
     mux.Handle("/app/", cfg.mwIncrementCounter(handler))
-    mux.HandleFunc("/healthz", checkHealth)
-    mux.HandleFunc("/metrics", cfg.checkMetrics)
-    mux.HandleFunc("/reset", cfg.resetHitCounter)
+
+    // ======================================================================
+    // ----------------------------------------------------------------------
+    // Api Endpoints
+    // ----------------------------------------------------------------------
+    // ======================================================================
+
+    mux.HandleFunc("GET /api/healthz", checkHealth)
+
+    // ======================================================================
+    // ----------------------------------------------------------------------
+    // Admin Endpoints
+    // ----------------------------------------------------------------------
+    // ======================================================================
+
+    mux.HandleFunc("GET /admin/metrics", cfg.checkMetrics)
+
+    // curl -X POST http://localhost:8080/api/reset
+    mux.HandleFunc("POST /admin/reset", cfg.resetHitCounter)
 
     // https://pkg.go.dev/net/http#Server
     // http.Server is a struct that defines the server configuration
