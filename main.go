@@ -36,6 +36,8 @@ func main() {
 
     mux.HandleFunc("GET /api/healthz", checkHealth)
 
+    mux.HandleFunc("POST /api/validate_chirp", validateChirp)
+
     // ======================================================================
     // ----------------------------------------------------------------------
     // Admin Endpoints
