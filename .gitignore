@@ -1,5 +1,6 @@
 // List files
 chirpy
+.env
 
 // List directories
 tmp

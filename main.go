@@ -3,11 +3,32 @@ package main
 import (
     "log"
     "net/http"
+    "os"
+
+    "database/sql"
+
+    "github.com/joho/godotenv"
+    "github.com/PhillipXT/chirpy/internal/database"
+
+    _ "github.com/lib/pq"
 )
 
 func main() {
     const port = "8080"
     const root = "./www"
+
+    godotenv.Load()
+
+    dbURL := os.Getenv("DB_URL")
+    log.Printf("Using %s\n", dbURL)
+
+    db, err := sql.Open("postgres", dbURL)
+    if err != nil {
+        log.Println("Error opening database, exiting...")
+    }
+
+    dbQueries := database.New(db)
+    log.Printf("Show this: %v\n", dbQueries)
 
     cfg := Config {}
     cfg.fileserverHits.Store(0)
@@ -18,33 +39,23 @@ func main() {
     // https://pkg.go.dev/net/http#ServeMux
     mux := http.NewServeMux()
 
-    // ======================================================================
-    // ----------------------------------------------------------------------
-    // Web Endpoints
-    // ----------------------------------------------------------------------
-    // ======================================================================
+    // Web Endpoints =======================================================>
 
     // https://pkg.go.dev/net/http#ServeMux.Handle
     handler := http.StripPrefix("/app", fs)
     mux.Handle("/app/", cfg.mwIncrementCounter(handler))
 
-    // ======================================================================
-    // ----------------------------------------------------------------------
-    // Api Endpoints
-    // ----------------------------------------------------------------------
-    // ======================================================================
+    // Api Endpoints =======================================================>
 
     mux.HandleFunc("GET /api/healthz", checkHealth)
 
     mux.HandleFunc("POST /api/validate_chirp", validateChirp)
 
-    // ======================================================================
-    // ----------------------------------------------------------------------
-    // Admin Endpoints
-    // ----------------------------------------------------------------------
-    // ======================================================================
+    // Admin Endpoints =====================================================>
 
     mux.HandleFunc("GET /admin/metrics", cfg.checkMetrics)
+
+    // =====================================================================>
 
     // curl -X POST http://localhost:8080/api/reset
     mux.HandleFunc("POST /admin/reset", cfg.resetHitCounter)

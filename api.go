@@ -4,6 +4,7 @@ import (
     "encoding/json"
     "log"
     "net/http"
+    "strings"
 )
 
 const maxChirpLength = 140
@@ -13,7 +14,7 @@ type Chirp struct {
 }
 
 type okResponse struct {
-    Valid bool `json:"valid"`
+    CleanedBody string `json:"cleaned_body"`
 }
 
 // Test with:
@@ -34,9 +35,30 @@ func validateChirp(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    cleaned := filterChirp(chirp.Body)
+    log.Printf("Filtered chirp: %s\n", cleaned)
+
     response := okResponse {
-        Valid: true,
+        CleanedBody: cleaned,
     }
 
     writeResponse(w, http.StatusOK, response)
+}
+
+func filterChirp(message string) string {
+    badWords := map[string]struct{} {
+        "kerfuffle": {},
+        "sharbert": {},
+        "fornax": {},
+    }
+
+    words := strings.Split(message, " ")
+
+    for i, word := range words {
+        if _, ok := badWords[strings.ToLower(word)]; ok {
+            words[i] = "****"
+        }
+    }
+
+    return strings.Join(words, " ")
 }

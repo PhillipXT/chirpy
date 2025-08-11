@@ -4,10 +4,13 @@ import (
     "fmt"
     "sync/atomic"
     "net/http"
+
+    "github.com/PhillipXT/chirpy/internal/database"
 )
 
 type Config struct {
     fileserverHits atomic.Int32
+    db *database.Queries
 }
 
 func (cfg *Config) mwIncrementCounter(next http.Handler) http.Handler {
