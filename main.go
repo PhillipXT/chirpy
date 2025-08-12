@@ -1,11 +1,11 @@
 package main
 
 import (
+    "database/sql"
     "log"
     "net/http"
     "os"
-
-    "database/sql"
+    "sync/atomic"
 
     "github.com/joho/godotenv"
     "github.com/PhillipXT/chirpy/internal/database"
@@ -22,6 +22,11 @@ func main() {
     dbURL := os.Getenv("DB_URL")
     log.Printf("Using %s\n", dbURL)
 
+    platform := os.Getenv("PLATFORM")
+    if platform == "" {
+        log.Fatal("PLATFORM must be set")
+    }
+
     db, err := sql.Open("postgres", dbURL)
     if err != nil {
         log.Println("Error opening database, exiting...")
@@ -30,8 +35,11 @@ func main() {
     dbQueries := database.New(db)
     log.Printf("Show this: %v\n", dbQueries)
 
-    cfg := Config {}
-    cfg.fileserverHits.Store(0)
+    cfg := Config {
+        fileserverHits: atomic.Int32{},
+        db: dbQueries,
+        platform: platform,
+    }
 
     // https://pkg.go.dev/net/http#FileServer
     fs := http.FileServer(http.Dir(root))
@@ -49,6 +57,7 @@ func main() {
 
     mux.HandleFunc("GET /api/healthz", checkHealth)
 
+    mux.HandleFunc("POST /api/users", cfg.createUser)
     mux.HandleFunc("POST /api/validate_chirp", validateChirp)
 
     // Admin Endpoints =====================================================>
