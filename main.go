@@ -33,7 +33,6 @@ func main() {
     }
 
     dbQueries := database.New(db)
-    log.Printf("Show this: %v\n", dbQueries)
 
     cfg := Config {
         fileserverHits: atomic.Int32{},
@@ -57,8 +56,11 @@ func main() {
 
     mux.HandleFunc("GET /api/healthz", checkHealth)
 
+    // curl -d '{"email":"phillip@spellweaver.com"}' -X POST http://localhost:8080/api/users
+    // curl -d '{"body":"01234567890","user_id":"123e4567-e89b-12d3-a456-426614174000"}' -X POST http://localhost:8080/api/chirps
     mux.HandleFunc("POST /api/users", cfg.createUser)
-    mux.HandleFunc("POST /api/validate_chirp", validateChirp)
+    mux.HandleFunc("POST /api/chirps", cfg.createChirp)
+    //mux.HandleFunc("POST /api/validate_chirp", validateChirp)
 
     // Admin Endpoints =====================================================>
 
@@ -66,7 +68,7 @@ func main() {
 
     // =====================================================================>
 
-    // curl -X POST http://localhost:8080/api/reset
+    // curl -X POST http://localhost:8080/admin/reset
     mux.HandleFunc("POST /admin/reset", cfg.resetHitCounter)
 
     // https://pkg.go.dev/net/http#Server

@@ -40,6 +40,8 @@ func (cfg *Config) resetHitCounter(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    log.Println("Resetting data...")
+
     err := cfg.db.Reset(r.Context())
     if err != nil {
         writeErrorResponse(w, http.StatusInternalServerError, "Error deleting users", nil)
