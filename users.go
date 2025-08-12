@@ -48,7 +48,7 @@ func (cfg *Config) createUser(w http.ResponseWriter, r *http.Request) {
         Email: user.Email,
     }
 
-    log.Printf("Writing json: %v", u)
+    log.Printf("Created user: %s\n", u.Email)
 
     writeResponse(w, http.StatusCreated, response { User: u })
 }
