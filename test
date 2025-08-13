@@ -1,0 +1,23 @@
+#!/bin/bash
+
+BASE_URL="http://localhost:8080"
+
+USER="{\"email\":\"phillip@spellweaver.com\"}"
+
+curl -X POST "$BASE_URL/admin/reset"
+
+echo
+
+JSON_USER=$(curl -d "$USER" -X POST "$BASE_URL/api/users")
+
+USER_ID=$(echo "$JSON_USER" | jq -r '.id')
+EMAIL=$(echo "$JSON_USER" | jq -r '.email')
+
+echo "$JSON_USER"
+echo "Created user: $EMAIL ($USER_ID)"
+
+CHIRP="{\"body\":\"01234 sharbert 56789\",\"user_id\":\"$USER_ID\"}"
+
+JSON_CHIRP=$(curl -d "$CHIRP" -X POST "$BASE_URL/api/chirps")
+
+echo "$JSON_CHIRP"

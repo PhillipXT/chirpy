@@ -22,6 +22,31 @@ type Chirp struct {
     UserID uuid.UUID `json:"user_id"`
 }
 
+func (cfg *Config) getChirps(w http.ResponseWriter, r *http.Request) {
+
+    data, err := cfg.db.GetChirps(r.Context())
+    if err != nil {
+        writeErrorResponse(w, http.StatusInternalServerError, "Error retrieving chirps", err)
+        return
+    }
+
+    log.Printf("Retrieved %d chirp(s)\n", len(data))
+
+    chirps := []Chirp{}
+
+    for _, row := range data {
+        chirps = append(chirps, Chirp {
+            ID: row.ID,
+            CreatedAt: row.CreatedAt,
+            UpdatedAt: row.UpdatedAt,
+            Body: row.Body,
+            UserID: row.UserID,
+        })
+    }
+
+    writeResponse(w, http.StatusOK, chirps)
+}
+
 func (cfg *Config) createChirp(w http.ResponseWriter, r *http.Request) {
 
     type parameters struct {
@@ -44,7 +69,7 @@ func (cfg *Config) createChirp(w http.ResponseWriter, r *http.Request) {
 
     cleaned, err := validateChirp(&params.Body)
     if err != nil {
-        writeErrorResponse(w, http.StatusBadRequest, "Chirp is too long", nil)
+        writeErrorResponse(w, http.StatusBadRequest, "Chirp is too long", err)
         return
     }
 
@@ -55,7 +80,7 @@ func (cfg *Config) createChirp(w http.ResponseWriter, r *http.Request) {
 
     fc, err := cfg.db.CreateChirp(r.Context(), chirp_params)
     if err != nil {
-        writeErrorResponse(w, http.StatusInternalServerError, "Error creating chirp", nil)
+        writeErrorResponse(w, http.StatusInternalServerError, "Error creating chirp", err)
         return
     }
 

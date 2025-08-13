@@ -56,11 +56,12 @@ func main() {
 
     mux.HandleFunc("GET /api/healthz", checkHealth)
 
-    // curl -d '{"email":"phillip@spellweaver.com"}' -X POST http://localhost:8080/api/users
     // curl -d '{"body":"01234567890","user_id":"123e4567-e89b-12d3-a456-426614174000"}' -X POST http://localhost:8080/api/chirps
-    mux.HandleFunc("POST /api/users", cfg.createUser)
+    mux.HandleFunc("GET /api/chirps", cfg.getChirps)
     mux.HandleFunc("POST /api/chirps", cfg.createChirp)
-    //mux.HandleFunc("POST /api/validate_chirp", validateChirp)
+
+    // curl -d '{"email":"phillip@spellweaver.com"}' -X POST http://localhost:8080/api/users
+    mux.HandleFunc("POST /api/users", cfg.createUser)
 
     // Admin Endpoints =====================================================>
 
