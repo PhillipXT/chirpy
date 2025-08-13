@@ -22,6 +22,37 @@ type Chirp struct {
     UserID uuid.UUID `json:"user_id"`
 }
 
+func (cfg *Config) getChirp(w http.ResponseWriter, r *http.Request) {
+
+    type response struct {
+        Chirp
+    }
+
+    uuid, err := uuid.Parse(r.PathValue("chirpID"))
+    if err != nil {
+        writeErrorResponse(w, http.StatusInternalServerError, "Error parsing UUID", err)
+        return
+    }
+
+    data, err := cfg.db.GetChirp(r.Context(), uuid)
+    if err != nil {
+        writeErrorResponse(w, http.StatusNotFound, "Error retrieving chirp", err)
+        return
+    }
+
+    log.Printf("Found chirp: %s\n", data.Body)
+
+    chirp := Chirp {
+        ID: data.ID,
+        CreatedAt: data.CreatedAt,
+        UpdatedAt: data.UpdatedAt,
+        Body: data.Body,
+        UserID: data.UserID,
+    }
+
+    writeResponse(w, http.StatusOK, response { Chirp: chirp })
+}
+
 func (cfg *Config) getChirps(w http.ResponseWriter, r *http.Request) {
 
     data, err := cfg.db.GetChirps(r.Context())

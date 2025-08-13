@@ -58,6 +58,7 @@ func main() {
 
     // curl -d '{"body":"01234567890","user_id":"123e4567-e89b-12d3-a456-426614174000"}' -X POST http://localhost:8080/api/chirps
     mux.HandleFunc("GET /api/chirps", cfg.getChirps)
+    mux.HandleFunc("GET /api/chirps/{chirpID}", cfg.getChirp)
     mux.HandleFunc("POST /api/chirps", cfg.createChirp)
 
     // curl -d '{"email":"phillip@spellweaver.com"}' -X POST http://localhost:8080/api/users
