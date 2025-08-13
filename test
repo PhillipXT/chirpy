@@ -2,7 +2,7 @@
 
 BASE_URL="http://localhost:8080"
 
-USER="{\"email\":\"phillip@spellweaver.com\"}"
+USER="{\"password\":\"12345\",\"email\":\"phillip@spellweaver.com\"}"
 
 curl -X POST "$BASE_URL/admin/reset"
 
