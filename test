@@ -2,22 +2,26 @@
 
 BASE_URL="http://localhost:8080"
 
-USER="{\"password\":\"12345\",\"email\":\"phillip@spellweaver.com\"}"
-
 curl -X POST "$BASE_URL/admin/reset"
 
 echo
 
-JSON_USER=$(curl -d "$USER" -X POST "$BASE_URL/api/users")
+USER_JSON="{\"password\":\"12345\",\"email\":\"phillip@spellweaver.com\"}"
+USER_POST=$(curl -d "$USER_JSON" -X POST "$BASE_URL/api/users" --no-progress-meter)
 
-USER_ID=$(echo "$JSON_USER" | jq -r '.id')
-EMAIL=$(echo "$JSON_USER" | jq -r '.email')
+USER_ID=$(echo "$USER_POST" | jq -r '.id')
+EMAIL=$(echo "$USER_POST" | jq -r '.email')
 
-echo "$JSON_USER"
 echo "Created user: $EMAIL ($USER_ID)"
 
-CHIRP="{\"body\":\"01234 sharbert 56789\",\"user_id\":\"$USER_ID\"}"
+LOGIN_JSON="{\"password\":\"12345\",\"email\":\"phillip@spellweaver.com\"}"
+LOGIN_POST=$(curl -d "$LOGIN_JSON" -X POST "$BASE_URL/api/login" --no-progress-meter)
 
-JSON_CHIRP=$(curl -d "$CHIRP" -X POST "$BASE_URL/api/chirps")
+TOKEN=$(echo "$LOGIN_POST" | jq -r '.token')
 
-echo "$JSON_CHIRP"
+echo "Received token: $TOKEN"
+
+CHIRP_JSON="{\"body\":\"01234 sharbert 56789\"}"
+CHIRP_POST=$(curl -d "$CHIRP_JSON" -H "Authorization: Bearer $TOKEN" -X POST "$BASE_URL/api/chirps" --no-progress-meter)
+
+echo "$CHIRP_POST"

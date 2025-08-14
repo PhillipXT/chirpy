@@ -17,6 +17,7 @@ type User struct {
     UpdatedAt time.Time `json:"updated_at"`
     Email string `json:"email"`
     Password string `json:"-"`
+    Token string `json:"token"`
 }
 
 func (cfg *Config) createUser(w http.ResponseWriter, r *http.Request) {

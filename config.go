@@ -13,6 +13,7 @@ type Config struct {
     fileserverHits atomic.Int32
     db *database.Queries
     platform string
+    secret string
 }
 
 func (cfg *Config) mwIncrementCounter(next http.Handler) http.Handler {

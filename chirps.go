@@ -9,6 +9,7 @@ import (
     "time"
 
     "github.com/google/uuid"
+    "github.com/PhillipXT/chirpy/internal/auth"
     "github.com/PhillipXT/chirpy/internal/database"
 )
 
@@ -82,17 +83,30 @@ func (cfg *Config) createChirp(w http.ResponseWriter, r *http.Request) {
 
     type parameters struct {
         Body string `json:"body"`
-        UserID uuid.UUID `json:"user_id"`
     }
 
     type response struct {
         Chirp
     }
 
+    token, err := auth.GetBearerToken(r.Header)
+    if err != nil {
+        writeErrorResponse(w, http.StatusUnauthorized, "Token missing", err)
+        return
+    }
+
+    log.Printf("Received token: %v...", token[0:40])
+
+    id, err := auth.ValidateJWT(token, cfg.secret)
+    if err != nil {
+        writeErrorResponse(w, http.StatusUnauthorized, "Token invalid", err)
+        return
+    }
+
     params := parameters {}
 
     decoder := json.NewDecoder(r.Body)
-    err := decoder.Decode(&params)
+    err = decoder.Decode(&params)
     if err != nil {
         writeErrorResponse(w, http.StatusInternalServerError, "Error decoding JSON", err)
         return
@@ -106,8 +120,10 @@ func (cfg *Config) createChirp(w http.ResponseWriter, r *http.Request) {
 
     chirp_params := database.CreateChirpParams {
         Body: cleaned,
-        UserID: params.UserID,
+        UserID: id,
     }
+
+    log.Printf("Chirp params: %v", chirp_params)
 
     fc, err := cfg.db.CreateChirp(r.Context(), chirp_params)
     if err != nil {

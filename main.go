@@ -27,6 +27,11 @@ func main() {
         log.Fatal("PLATFORM must be set")
     }
 
+    secret := os.Getenv("SECRET")
+    if secret == "" {
+        log.Fatal("SECRET must be set")
+    }
+
     db, err := sql.Open("postgres", dbURL)
     if err != nil {
         log.Println("Error opening database, exiting...")

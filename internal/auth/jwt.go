@@ -3,6 +3,8 @@ package auth
 import (
     "errors"
     "fmt"
+    "net/http"
+    "strings"
     "time"
 
     "github.com/google/uuid"
@@ -12,6 +14,20 @@ import (
 const (
     token_issuer = "chirpy"
 )
+
+func GetBearerToken(headers http.Header) (string, error) {
+    header := headers.Get("Authorization")
+    if header == "" {
+        return "", errors.New("authorization token missing")
+    }
+
+    split := strings.Split(header, " ")
+    if len(split) < 2 || split[0] != "Bearer" {
+        return "", errors.New("malformed authorization header")
+    }
+
+    return split[1], nil
+}
 
 func MakeJWT(userID uuid.UUID, tokenSecret string, expiresIn time.Duration) (string, error) {
 
