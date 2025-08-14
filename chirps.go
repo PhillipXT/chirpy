@@ -176,3 +176,52 @@ func filterChirp(message string) string {
 
     return strings.Join(words, " ")
 }
+
+func (cfg *Config) deleteChirp(w http.ResponseWriter, r *http.Request) {
+
+    access_token, err := auth.GetBearerToken(r.Header)
+    if err != nil {
+        writeErrorResponse(w, http.StatusUnauthorized, "Authentication token missing", err)
+        return
+    }
+
+    user_id, err := auth.ValidateJWT(access_token, cfg.secret)
+    if err != nil {
+        writeErrorResponse(w, http.StatusUnauthorized, "Token invalid", err)
+        return
+    }
+
+    type response struct {
+        Chirp
+    }
+
+    uuid, err := uuid.Parse(r.PathValue("chirpID"))
+    if err != nil {
+        writeErrorResponse(w, http.StatusInternalServerError, "Error parsing UUID", err)
+        return
+    }
+
+    data, err := cfg.db.GetChirp(r.Context(), uuid)
+    if err != nil {
+        writeErrorResponse(w, http.StatusNotFound, "Error retrieving chirp", err)
+        return
+    }
+
+    if data.UserID != user_id {
+        writeErrorResponse(w, http.StatusForbidden, "No permissions to delete chirp", err)
+        return
+    }
+
+    delete_params := database.DeleteChirpParams {
+        ID: uuid,
+        UserID: user_id,
+    }
+
+    err = cfg.db.DeleteChirp(r.Context(), delete_params)
+    if err != nil {
+        writeErrorResponse(w, http.StatusInternalServerError, "Error deleting chirp", err)
+        return
+    }
+
+    w.WriteHeader(http.StatusNoContent)
+}

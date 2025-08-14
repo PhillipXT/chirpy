@@ -74,6 +74,8 @@ func main() {
     mux.HandleFunc("POST /api/refresh", cfg.refreshToken)
     mux.HandleFunc("POST /api/revoke", cfg.revokeToken)
 
+    mux.HandleFunc("DELETE /api/chirps/{chirpID}", cfg.deleteChirp)
+
     // Admin Endpoints =====================================================>
 
     mux.HandleFunc("GET /admin/metrics", cfg.checkMetrics)
