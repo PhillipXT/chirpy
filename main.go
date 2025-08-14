@@ -65,10 +65,14 @@ func main() {
     mux.HandleFunc("GET /api/chirps", cfg.getChirps)
     mux.HandleFunc("GET /api/chirps/{chirpID}", cfg.getChirp)
 
+    mux.HandleFunc("PUT /api/users", cfg.updateUser)
+
     // curl -d '{"password":"12345","email":"phillip@spellweaver.com"}' -X POST http://localhost:8080/api/users
     mux.HandleFunc("POST /api/chirps", cfg.createChirp)
     mux.HandleFunc("POST /api/users", cfg.createUser)
     mux.HandleFunc("POST /api/login", cfg.login)
+    mux.HandleFunc("POST /api/refresh", cfg.refreshToken)
+    mux.HandleFunc("POST /api/revoke", cfg.revokeToken)
 
     // Admin Endpoints =====================================================>
 

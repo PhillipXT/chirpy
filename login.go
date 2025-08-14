@@ -6,6 +6,7 @@ import (
     "time"
 
     "github.com/PhillipXT/chirpy/internal/auth"
+    "github.com/PhillipXT/chirpy/internal/database"
 )
 
 func (cfg *Config) login(w http.ResponseWriter, r *http.Request) {
@@ -13,7 +14,6 @@ func (cfg *Config) login(w http.ResponseWriter, r *http.Request) {
     type parameters struct {
         Password string `json:"password"`
         Email string `json:"email"`
-        Expiry int `json:"-"`
     }
 
     type response struct {
@@ -29,11 +29,6 @@ func (cfg *Config) login(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    expirationTime := time.Hour
-    if params.Expiry > 0 && params.Expiry < 3600 {
-        expirationTime = time.Duration(params.Expiry) * time.Second
-    }
-
     user, err := cfg.db.FindUser(r.Context(), params.Email)
     if err != nil {
         writeErrorResponse(w, http.StatusUnauthorized, "Incorrect email or password", err)
@@ -46,9 +41,25 @@ func (cfg *Config) login(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    expirationTime := time.Hour
+
     token, err := auth.MakeJWT(user.ID, cfg.secret, expirationTime)
     if err != nil {
         writeErrorResponse(w, http.StatusInternalServerError, "Error creating token", err)
+        return
+    }
+
+    refresh_token := auth.MakeRefreshToken()
+
+    refresh_params := database.CreateRefreshTokenParams {
+        Token: refresh_token,
+        UserID: user.ID,
+        ExpiresAt: time.Now().UTC().Add(time.Hour * 24 * 60),
+    }
+
+    _, err = cfg.db.CreateRefreshToken(r.Context(), refresh_params)
+    if err != nil {
+        writeErrorResponse(w, http.StatusInternalServerError, "Error creating refresh token", err)
         return
     }
 
@@ -59,6 +70,7 @@ func (cfg *Config) login(w http.ResponseWriter, r *http.Request) {
             UpdatedAt: user.UpdatedAt,
             Email: user.Email,
             Token: token,
+            RefreshToken: refresh_token,
         },
     })
 }

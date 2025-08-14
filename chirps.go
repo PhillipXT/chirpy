@@ -89,13 +89,15 @@ func (cfg *Config) createChirp(w http.ResponseWriter, r *http.Request) {
         Chirp
     }
 
+    log.Printf("[chirps.go] Headers: %v", r.Header)
+
     token, err := auth.GetBearerToken(r.Header)
     if err != nil {
         writeErrorResponse(w, http.StatusUnauthorized, "Token missing", err)
         return
     }
 
-    log.Printf("Received token: %v...", token[0:40])
+    log.Printf("[chirps.go] Received token: %v", token)
 
     id, err := auth.ValidateJWT(token, cfg.secret)
     if err != nil {
@@ -139,20 +141,20 @@ func (cfg *Config) createChirp(w http.ResponseWriter, r *http.Request) {
         UserID: fc.UserID,
     }
 
-    log.Printf("Created chirp: %s\n", o.ID)
+    log.Printf("[chirps.go] Created chirp: %s\n", o.ID)
 
     writeResponse(w, http.StatusCreated, response { Chirp: o })
 }
 
 func validateChirp(chirp *string) (string, error) {
 
-    log.Printf("Chirp length: %d\n", len(*chirp))
+    log.Printf("[chirps.go] Chirp length: %d\n", len(*chirp))
     if len(*chirp) > maxChirpLength {
         return "", errors.New("Chirp is too long")
     }
 
     cleaned := filterChirp(*chirp)
-    log.Printf("Filtered chirp: %s\n", cleaned)
+    log.Printf("[chirps.go] Filtered chirp: %s\n", cleaned)
 
     return cleaned, nil
 }
