@@ -197,7 +197,7 @@ func (cfg *Config) deleteChirp(w http.ResponseWriter, r *http.Request) {
 
     uuid, err := uuid.Parse(r.PathValue("chirpID"))
     if err != nil {
-        writeErrorResponse(w, http.StatusInternalServerError, "Error parsing UUID", err)
+        writeErrorResponse(w, http.StatusBadRequest, "Invalid chirp ID", err)
         return
     }
 
