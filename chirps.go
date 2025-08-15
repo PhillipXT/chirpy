@@ -5,6 +5,7 @@ import (
     "errors"
     "log"
     "net/http"
+    "sort"
     "strings"
     "time"
 
@@ -86,6 +87,13 @@ func (cfg *Config) getChirps(w http.ResponseWriter, r *http.Request) {
             UpdatedAt: row.UpdatedAt,
             Body: row.Body,
             UserID: row.UserID,
+        })
+    }
+
+    order := r.URL.Query().Get("sort")
+    if order == "desc" {
+        sort.Slice(chirps, func(i, j int) bool {
+            return chirps[i].CreatedAt.After(chirps[j].CreatedAt)
         })
     }
 
