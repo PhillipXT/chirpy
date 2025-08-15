@@ -71,6 +71,7 @@ func (cfg *Config) login(w http.ResponseWriter, r *http.Request) {
             Email: user.Email,
             Token: token,
             RefreshToken: refresh_token,
+            IsChirpyRed: user.IsChirpyRed,
         },
     })
 }

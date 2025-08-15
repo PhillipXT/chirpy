@@ -19,6 +19,7 @@ type User struct {
     Password string `json:"-"`
     Token string `json:"token"`
     RefreshToken string `json:"refresh_token"`
+    IsChirpyRed bool `json:"is_chirpy_red"`
 }
 
 func (cfg *Config) createUser(w http.ResponseWriter, r *http.Request) {
@@ -63,6 +64,7 @@ func (cfg *Config) createUser(w http.ResponseWriter, r *http.Request) {
         CreatedAt: user.CreatedAt,
         UpdatedAt: user.UpdatedAt,
         Email: user.Email,
+        IsChirpyRed: user.IsChirpyRed,
     }
 
     log.Printf("Created user: %s\n", u.Email)
@@ -124,6 +126,7 @@ func (cfg *Config) updateUser(w http.ResponseWriter, r *http.Request) {
         CreatedAt: user.CreatedAt,
         UpdatedAt: user.UpdatedAt,
         Email: user.Email,
+        IsChirpyRed: user.IsChirpyRed,
     }
 
     writeResponse(w, http.StatusOK, response { User: u, })

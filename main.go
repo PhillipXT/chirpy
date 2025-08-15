@@ -32,6 +32,8 @@ func main() {
         log.Fatal("SECRET must be set")
     }
 
+    polka_key := os.Getenv("POLKA_KEY")
+
     db, err := sql.Open("postgres", dbURL)
     if err != nil {
         log.Println("Error opening database, exiting...")
@@ -43,6 +45,8 @@ func main() {
         fileserverHits: atomic.Int32{},
         db: dbQueries,
         platform: platform,
+        secret: secret,
+        polka_key: polka_key,
     }
 
     // https://pkg.go.dev/net/http#FileServer
@@ -73,6 +77,7 @@ func main() {
     mux.HandleFunc("POST /api/login", cfg.login)
     mux.HandleFunc("POST /api/refresh", cfg.refreshToken)
     mux.HandleFunc("POST /api/revoke", cfg.revokeToken)
+    mux.HandleFunc("POST /api/polka/webhooks", cfg.upgradeUser)
 
     mux.HandleFunc("DELETE /api/chirps/{chirpID}", cfg.deleteChirp)
 

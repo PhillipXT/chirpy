@@ -14,6 +14,7 @@ type Config struct {
     db *database.Queries
     platform string
     secret string
+    polka_key string
 }
 
 func (cfg *Config) mwIncrementCounter(next http.Handler) http.Handler {

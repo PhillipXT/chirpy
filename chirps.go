@@ -56,13 +56,26 @@ func (cfg *Config) getChirp(w http.ResponseWriter, r *http.Request) {
 
 func (cfg *Config) getChirps(w http.ResponseWriter, r *http.Request) {
 
-    data, err := cfg.db.GetChirps(r.Context())
-    if err != nil {
-        writeErrorResponse(w, http.StatusInternalServerError, "Error retrieving chirps", err)
-        return
-    }
+    var err error
 
-    log.Printf("Retrieved %d chirp(s)\n", len(data))
+    id := r.URL.Query().Get("author_id")
+    author_id, err := uuid.Parse(id)
+
+    data := []database.Chirp{}
+
+    if id == "" {
+        data, err = cfg.db.GetChirps(r.Context())
+        if err != nil {
+            writeErrorResponse(w, http.StatusInternalServerError, "Error retrieving chirps", err)
+            return
+        }
+    } else {
+        data, err = cfg.db.GetChirpsByAuthor(r.Context(), author_id)
+        if err != nil {
+            writeErrorResponse(w, http.StatusInternalServerError, "Error retrieving chirps", err)
+            return
+        }
+    }
 
     chirps := []Chirp{}
 
